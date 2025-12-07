@@ -7,5 +7,5 @@ edition = "2024"
 actix-web = "4.4.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0" # Or a more recent version
-futures  = "0.3"
+futures = "0.3"
 
