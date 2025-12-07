@@ -1,81 +1,48 @@
-use actix_web::{web,get, post, put, delete, App, HttpResponse, HttpServer, Responder};
-use std::sync::Mutex as Mut;
+use actix_web::{get,web, App, Responder , HttpResponse, HttpServer,Result,HttpRequest};
 
-struct AppState {
- app_name: String,
- count:Mut<i32>,
+struct Info {
+    username: String,
+    age: u8,
 }
 
-struct MyData {
-    value: String,
+// #[get("/users/{username}/{age}")]
+// async fn index(path : web::Path<(String,String)>, json : web::Json<Info>) -> impl Responder  {
+//     let path = path.into_inner();
+//     format!("{} {} {} {}, path.0, path.1,json.username,json.age")
+// }
+
+
+// impl1 1
+// #[get("/users/{user_id}/{friend}")] // <- define path parameters
+// async fn index(path: web::Path<(u32, String)>) -> Result<String> {
+//     let (user_id, friend) = path.into_inner();
+//     Ok(format!("Welcome {}, user_id {}!", friend, user_id))
+// }
+
+
+// implindex 2
+#[get("/users/{user_id}/{friend}")] // <- define path parameters
+async fn index2(req : HttpRequest) -> Result<String> {
+    let user_id : u32 = req.match_info().get("user_id").unwrap().parse().unwrap();
+    let friend:String = req.match_info().get("friend").unwrap().to_string();
+
+    Ok(format!("Welcome {}, user_id {}!", friend, user_id))
 }
-
-
-#[get("/")]
-async fn hello(data : web::Data<AppState>) -> impl Responder {
-    
-    let mut    count = data.count.lock().unwrap();
-    *count += 1;
-    let app_name = &data.app_name;
-    let current_count = *count;
-    println!("App Name: {} , Count : {}", app_name,current_count); 
-    "Get API is working| for ".to_owned() + app_name + " with count: " + &current_count.to_string()
-}
-
-
-fn scoped_config(cfg:&mut web::ServiceConfig){
-    cfg.service(web::resource("/scoped")
-    .route(web::get().to(|| async {HttpResponse::Ok().body("This is scope test") }))
-    .route(web::head().to(HttpResponse::MethodNotAllowed))
-    );
-
-}
-
-fn config(cfg: &mut web::ServiceConfig){
-    
-    cfg.service(
-        web::resource("/app")
-          .route(web::get().to(|| async {HttpResponse::Ok().body("Config test")}))
-          .route(web::head().to(HttpResponse::MethodNotAllowed))
-    )   ;
-
-}
-
-#[post("/create")]
-async fn create() -> impl Responder {
-    HttpResponse::Created().body("resource created successfully|")
-}
-
-#[put("/update")]
-async fn update() -> impl Responder {
-    HttpResponse::Ok().body("resource updated successfully|")
-}
-
-
-
-#[delete("/delete")]
-async fn delete() -> impl Responder {
-    HttpResponse::NoContent().finish()
-}
-
-
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(||{
-        App::new()
-        .configure(config)
-            .data(AppState {
-                app_name: String::from("Actix Web Demo"),
-                count: Mut::new(0),
-            })
-            .service(web::scope("/scoped_app").configure(scoped_config))
-            .service(hello)
-            .service(create)
-            .service(update)
-            .service(delete)
-              })
-             .bind("127.0.0.1:8080")?
-             .run()
-             .await
+
+    HttpServer::new(|| App::new()
+        // .service(index)
+        .service(index2)
+        .route("/", web::get().to(HttpResponse::Ok)))
+        .bind(("127.0.0.1", 8080))?
+        .run()
+        .await
+
+    // multi threaded server
+    // let _= HttpServer::new(||App::new().route("/".web.get()
+    //         .to(HttpResponse::Ok))).workers(2);
+
+
 }
