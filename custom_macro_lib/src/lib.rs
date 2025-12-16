@@ -24,3 +24,28 @@ pub fn derive_answer_fn(input: TokenStream) -> TokenStream {
     // Convert the generated code back into a TokenStream
     code.into()
 }
+
+#[proc_macro_attribute]
+pub fn log_execution(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    // let item_dyn = 
+      let item_dn= syn::parse_macro_input!(item as syn::ItemFn);
+        let name = &item_dn.sig.ident;
+        let body = &item_dn.block;
+        let vis = &item_dn.vis;
+        let args = &item_dn.sig.inputs;
+        let output = &item_dn.sig.output;
+        let expanded = quote! {
+            #vis fn #name(#args) #output {
+                // total time in executing the function
+                let start = std::time::Instant::now();
+                println!("Entering function: {}", stringify!(#name));
+                let result = (|| #body)();
+                println!("Exiting function: {}", stringify!(#name));
+                let duration = start.elapsed();
+                println!("Function {} took {:?}", stringify!(#name), duration);
+                result
+            }
+        };
+        TokenStream::from(expanded)
+
+}

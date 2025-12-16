@@ -8,6 +8,6 @@ edition = "2024"
 proc-macro = true
 
 [dependencies]
-syn = "2.0"       # Common dependency for parsing token streams
+syn = { version = "1.0", features = ["full"] }     # Common dependency for parsing token streams
 quote = "1.0"     # Common dependency for generating code
 # other dependencies needed by the macro implementation itself
