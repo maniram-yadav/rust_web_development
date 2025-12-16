@@ -1,2 +1,6 @@
 actix_web_demo/target/
 actix_web_demo/.env
+custom_macro_lib/target/
+macro_lib_usage/target/
+custom_macro_lib/Cargo.lock
+macro_lib_usage/Cargo.lock

@@ -1,0 +1,13 @@
+[package]
+name = "custom_macro_lib"
+version = "0.1.0"
+edition = "2024"
+
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = "2.0"       # Common dependency for parsing token streams
+quote = "1.0"     # Common dependency for generating code
+# other dependencies needed by the macro implementation itself
