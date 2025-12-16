@@ -49,3 +49,32 @@ pub fn log_execution(_attr: TokenStream, item: TokenStream) -> TokenStream {
         TokenStream::from(expanded)
 
 }
+
+
+#[proc_macro]
+pub fn make_map(input : TokenStream) -> TokenStream{
+    let input_str = input.to_string();
+    let pairs: Vec<&str> = input_str.split(',').collect();
+    let mut map_entries = Vec::new();
+
+    for pair in pairs {
+        let kv: Vec<&str> = pair.split("=>").map(|s| s.trim()).collect();
+        if kv.len() == 2 {
+            let key = kv[0];
+            let value = kv[1];
+            map_entries.push(quote! {
+                map.insert(#key.to_string(), #value.to_string());
+            });
+        }
+    }
+
+    let expanded = quote! {
+        {
+            let mut map = std::collections::HashMap::new();
+            #(#map_entries)*
+            map
+        }
+    };
+
+    TokenStream::from(expanded)
+}
